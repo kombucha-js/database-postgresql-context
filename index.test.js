@@ -10,7 +10,7 @@ function createContext(...args) {
   return new TestContext( ...args );
 }
 
-const testdb = require('async-context/jest-utils').createJestTester( test, createContext, {autoCommit:false, showReport:true,coloredReport:true, reportMethod:'stderr' } );
+const testdb = require('asynchronous-context/jest-utils').createJestTester( test, createContext, {autoCommit:false, showReport:true,coloredReport:true, reportMethod:'stderr' } );
 
 const IN_USERS = [
   { username:'hello_world', local_attrs: {age:12, nickname: 'foo-12',  nickname1: 'bar-12',  nickname2: 'bum-12',} },
@@ -123,7 +123,7 @@ testdb( 'second test', async function() {
     WHERE
       foo_id = $foo_id AND
       bar_id = $bar_id AND
-      buz_id = $foo_id 
+      buz_id = $foo_id
   `;
 
   // connection.logger.error( connection.query( sql ) );
@@ -195,7 +195,7 @@ testdb( 'third test', async function() {
     WHERE
       foo_id = $foo_id AND
       bar_id = $bar_id AND
-      buz_id = $buz_id 
+      buz_id = $buz_id
   `;
 
   // connection.logger.error( connection.query( sql ) );

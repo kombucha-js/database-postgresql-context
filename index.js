@@ -1,8 +1,8 @@
 'use strict';
 
-// Object.assign( module.exports,  require( 'async-context' ));
+// Object.assign( module.exports,  require( 'asynchronous-context' ));
 
-const { AsyncContext }     = require( 'async-context/context' );
+const { AsyncContext }     = require( 'asynchronous-context/context' );
 const { preventUndefined,unprevent } = require( 'prevent-undefined' );
 const sqlNamedParameters   = require( 'sql-named-parameters' );
 
@@ -34,7 +34,7 @@ module.exports.DatabaseContextError = DatabaseContextError;
 
 class DatabaseContextDataset {
   constructor( result ) {
-    if ( ! result  ) 
+    if ( ! result  )
       throw new DatabaseContextError( { message: 'result was null' }  );
 
     if ( Array.isArray( result ) ) {
@@ -116,7 +116,7 @@ const MSG_SINGLE_RESULTSET_ERROR   = 'single resultset error / cannot call a met
 const MSG_MULTIPLE_RESULTSET_ERROR = 'multiple resultset error / cannot call a method for single resultset. ( maybe you accidentally get multiple results )' ;
 class DatabaseContextMultipleDataset {
   constructor( result ) {
-    if ( ! result  ) 
+    if ( ! result  )
       throw new DatabaseContextError( 'result was null' );
 
     if ( ! Array.isArray( result ) ) {
@@ -170,7 +170,7 @@ module.exports.DatabaseContext = DatabaseContext;
 
 async function __query( sql, numberedParams, namedParams ) {
   try {
-    if ( ! this.isConntected() ) 
+    if ( ! this.isConntected() )
       throw new Error( 'no database connection was established' );
 
     let result = await this.__pgClient.query( sql, numberedParams );
@@ -209,8 +209,8 @@ async function __query( sql, numberedParams, namedParams ) {
     }
 
   } catch ( e ) {
-    const ee = new DatabaseContextError( 
-      { message : `DatabaseContext Error: ${e.message}\n${sql}\n${ namedParams }` }, 
+    const ee = new DatabaseContextError(
+      { message : `DatabaseContext Error: ${e.message}\n${sql}\n${ namedParams }` },
       { cause: e }
     );
 
@@ -224,7 +224,7 @@ async function __query( sql, numberedParams, namedParams ) {
 
     throw ee;
 
-    // (Tue, 13 Dec 2022 13:28:02 +0900) 
+    // (Tue, 13 Dec 2022 13:28:02 +0900)
     // if you throw the raised database error directly, the stacktrace will be
     // incorrect.
     // throw e;
@@ -256,7 +256,7 @@ async function connect() {
   this.logger.output({
     type   : 'database-connect',
   });
-  if ( this.isConntected() ) 
+  if ( this.isConntected() )
     throw new DatabaseContextError({message:'this context has already established a connection.'});
   this.__pgClient = await pool.connect();
   return this;
@@ -295,7 +295,7 @@ async function finalizeContextOfDatabaseContext(is_successful) {
 
     if ( context.__autoCommit === true ) {
       try {
-        if ( is_successful ) { 
+        if ( is_successful ) {
           context.logger.log( 'commit for finalization' );
           await context.commitTransaction();
         } else {
