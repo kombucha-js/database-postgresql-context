@@ -92,7 +92,7 @@ class DatabaseContextDataset {
     }
   }
   singleRowOrNull() {
-    console.log( 'this.result.rows.length', this.result.rows.length );
+    // console.log( 'this.result.rows.length', this.result.rows.length );
     if ( this.result.rows && Array.isArray( this.result.rows ) ) {
       if ( this.result.rows.length < 1 ) {
         return null;
@@ -278,7 +278,7 @@ DatabaseContext.prototype.disconnect = disconnect;
 async function initializeContextOfDatabaseContext() {
   // console.log( 'this.getOptions().autoCommit', this.getOptions().autoCommit );
   if ( this.getOptions().autoCommit === true ) {
-    console.log( 'autoCommit is true ' );
+    // console.log( 'autoCommit is true ' );
     const context = this;
     context.__autoCommit = true;
     await context.connect();
