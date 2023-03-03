@@ -6,7 +6,7 @@ const { AsyncContext }     = require( 'asynchronous-context/context' );
 const { preventUndefined,unprevent } = require( 'prevent-undefined' );
 const sqlNamedParameters   = require( 'sql-named-parameters' );
 
-const { Pool } = require('pg')
+const { Pool, Client } = require('pg')
 const pool = new Pool();
 const DEBUG = false;
 
@@ -209,18 +209,23 @@ async function __query( sql, numberedParams, namedParams ) {
     }
 
   } catch ( e ) {
+    console.error(e);
     const ee = new DatabaseContextError(
       { message : `DatabaseContext Error: ${e.message}\n${sql}\n${ namedParams }` },
       { cause: e }
     );
 
-    this.logger.output({
-      type        : 'query-error',
-      sql         : sql,
-      namedParams : namedParams,
-      params      : numberedParams,
-      value : ee,
-    },1);
+    try {
+      this.logger.output({
+        type        : 'query-error',
+        sql         : sql,
+        namedParams : namedParams,
+        params      : numberedParams,
+        value : ee,
+      },1);
+    } catch (eee){
+      console.error(eee);
+    }
 
     throw ee;
 
@@ -258,7 +263,11 @@ async function connect() {
   });
   if ( this.isConntected() )
     throw new DatabaseContextError({message:'this context has already established a connection.'});
-  this.__pgClient = await pool.connect();
+
+  this.__pgClient = new Client();
+  this.__pgClient.connect();
+  // this.__pgClient = await pool.connect();
+
   return this;
 };
 DatabaseContext.prototype.connect = connect;
@@ -268,7 +277,13 @@ async function disconnect() {
     type   : 'database-disconnect',
   });
   if ( this.isConntected() ) {
-    await this.__pgClient.release();
+    if ( 'end' in this.__pgClient ) {
+      await this.__pgClient.end();
+    } else if ( 'release' in this.__pgClient ) {
+      await this.__pgClient.release();
+    } else {
+      console.error('__pgClient has not method to finalize');
+    }
     this.__pgClient = null;
   }
   return this;
