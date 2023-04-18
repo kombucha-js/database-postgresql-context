@@ -14,7 +14,6 @@ function createContext(...args) {
 const assert = require( 'node:assert/strict' );
 const { test, describe, it, before, after }  = require( 'node:test' );
 const testdb = require('asynchronous-context/test-utils').createTest( it, createContext, { suppressSuccessfulReport:true, autoCommit:false, showReport:true, coloredReport:true, reportMethod:'stderr' } );
-//const testdb = require('asynchronous-context/jest-utils').createJestTester( test, createContext, {autoCommit:false, showReport:true,coloredReport:true, reportMethod:'stderr' } );
 
 const IN_USERS = [
   { username:'hello_world', local_attrs: {age:12, nickname: 'foo-12',  nickname1: 'bar-12',  nickname2: 'bum-12',} },
