@@ -2,6 +2,7 @@
 
 // Object.assign( module.exports,  require( 'asynchronous-context' ));
 
+require('dotenv').config();
 const { AsyncContext }     = require( 'asynchronous-context/context' );
 const { preventUndefined,unprevent } = require( 'prevent-undefined' );
 const sqlNamedParameters   = require( 'sql-named-parameters' );
@@ -380,11 +381,15 @@ const SQL_ROLLBACK = _sql`ROLLBACK;`;
 
 module.exports._sql = _sql;
 
-async function shutdownPool() {
+async function shutdownDatabaseContext() {
   await end();
   return true;
 }
-DatabaseContext.shutdownPool = shutdownPool;
+DatabaseContext.shutdownDatabaseContext = shutdownDatabaseContext;
+
+// >>> ADDED (Tue, 18 Apr 2023 10:10:55 +0900)
+module.exports.shutdownDatabaseContext = shutdownDatabaseContext;
+// <<<
 
 
 async function beginTransaction() {
