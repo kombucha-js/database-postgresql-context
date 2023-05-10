@@ -34,73 +34,63 @@ class DatabaseContextError extends Error {
 module.exports.DatabaseContextError = DatabaseContextError;
 
 class DatabaseContextDataset {
-  constructor( result ) {
-    if ( ! result  )
-      throw new DatabaseContextError( { message: 'result was null' }  );
-
-    if ( Array.isArray( result ) ) {
-      throw new DatabaseContextError( { message: 'multiple resultset error'} );
+  #rows  = null;
+  #count = null;
+  constructor( rows, count ) {
+    if ( rows !== null && ! Array.isArray( rows ) ) {
+      throw new DatabaseContextError({message:'the `rows` argument should be either null or an array'});
     }
-
-    this.result = result;
+    if ( count !== null && typeof count !== 'number' ) {
+      throw new DatabaseContextError({message:'the `rows` argument should be either null or an array'});
+    }
+    this.#rows  = rows;
+    this.#count = count;
   }
-  getResult() {
-    return this.result;
-  }
-  get rowCount() {
-    if ( typeof this.result.rowCount  === 'number' ) {
-      return this.result.rowCount;
+  get count() {
+    if ( typeof this.#count  === 'number' ) {
+      return this.#count;
     } else {
       throw new DatabaseContextError({message:'the query was not an update query'});
     }
   }
   get rows() {
-    if ( this.result.rows && Array.isArray( this.result.rows ) ) {
-      return this.result.rows;
-    } else {
-      throw new DatabaseContextError({message:'the result has no dataset'});
-    }
+    return this.#rows;
   }
   firstRow() {
-    if ( this.result.rows && Array.isArray( this.result.rows ) && 0 < this.result.rows.length ) {
-      return this.result.rows[0];
-    } else {
+    const row = this.firstRowOrNull();
+    if ( row === null ) {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
+    return row;
   }
   firstRowOrNull() {
-    try {
-      this.firstRow();
-    } catch ( e ) {
-      if ( e instanceof DatabaseContextError ) {
-        return null;
-      } else {
-        throw e;
-      }
+    if ( Array.isArray( this.#rows ) && 0 < this.#rows.length ) {
+      return this.#rows[0];
+    } else {
+      return null;
     }
   }
   singleRow() {
-    if ( this.result.rows && Array.isArray( this.result.rows ) ) {
-      if ( this.result.rows.length < 1 ) {
+    if ( Array.isArray( this.#rows ) ) {
+      if ( this.#rows.length < 1 ) {
         throw new DatabaseContextError({message:'the result has no dataset'});
-      } else if ( this.result.rows.length === 1 ) {
-        return this.result.rows[0];
+      } else if ( this.#rows.length === 1 ) {
+        return this.#rows[0];
       } else {
-        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.result.rows.length} `});
+        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.#rows.length} `});
       }
     } else {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
   }
   singleRowOrNull() {
-    // console.log( 'this.result.rows.length', this.result.rows.length );
-    if ( this.result.rows && Array.isArray( this.result.rows ) ) {
-      if ( this.result.rows.length < 1 ) {
+    if ( Array.isArray( this.#rows ) ) {
+      if ( this.#rows.length < 1 ) {
         return null;
-      } else if ( this.result.rows.length === 1 ) {
-        return this.result.rows[0];
+      } else if ( this.#rows.length === 1 ) {
+        return this.#rows[0];
       } else {
-        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.result.rows.length} `});
+        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.#rows.length} `});
       }
     } else {
       return null;
@@ -116,23 +106,15 @@ module.exports.DatabaseContextDataset = DatabaseContextDataset;
 const MSG_SINGLE_RESULTSET_ERROR   = 'single resultset error / cannot call a method for multiple resultsets. ';
 const MSG_MULTIPLE_RESULTSET_ERROR = 'multiple resultset error / cannot call a method for single resultset. ( maybe you accidentally get multiple results )' ;
 class DatabaseContextMultipleDataset {
-  constructor( result ) {
-    if ( ! result  )
-      throw new DatabaseContextError( 'result was null' );
-
-    if ( ! Array.isArray( result ) ) {
-      throw new DatabaseContextError( 'the specified result object is not an array' );
+  #results = null;
+  constructor( results ) {
+    if ( ! Array.isArray( results ) ) {
+      throw new DatabaseContextError( 'the specified results object is not an array' );
     }
 
-    this.result = result.map( e=>new DatabaseContextDataset( e ) );;
+    this.#results = results;
   }
-  getResultArray() {
-    return [ ...this.result ];
-  }
-  getResult() {
-    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
-  }
-  get rowcount() {
+  get count() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
   }
   get rows() {
@@ -149,6 +131,9 @@ class DatabaseContextMultipleDataset {
   }
   singleRowOrNull() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  getResultArray() {
+    return [ ...this.#results ];
   }
 }
 module.exports.DatabaseContextMultipleDataset = DatabaseContextMultipleDataset;
@@ -169,17 +154,19 @@ class DatabaseContext extends AsyncContext {
 module.exports.DatabaseContext = DatabaseContext;
 
 
+const result2dataset = result => new DatabaseContextDataset( result .rows ?? null, result.rowCount ?? null);
+
+const result2log = (result)=>({
+    rows      :  result.rows,
+    count     :  result.count,
+});
+
 async function __query( sql, numberedParams, namedParams ) {
   try {
     if ( ! this.isConntected() )
       throw new Error( 'no database connection was established' );
 
-    let result = await this.__pgClient.query( sql, numberedParams );
-
-    const result2log = (result)=>({
-        rows      :  result.rows,
-        rowCount  :  result.rowCount,
-    });
+    const result = await this.__pgClient.query( sql, numberedParams );
 
     if ( ! Array.isArray( result ) ) {
       this.logger.output({
@@ -192,7 +179,7 @@ async function __query( sql, numberedParams, namedParams ) {
           result    : result2log( result ),
         }
       },1);
-      return new DatabaseContextDataset( result );
+      return result2dataset( result );
     } else {
 
       this.logger.output({
@@ -206,7 +193,7 @@ async function __query( sql, numberedParams, namedParams ) {
         }
       },1);
 
-      return new DatabaseContextMultipleDataset( result );
+      return new DatabaseContextMultipleDataset( result.map( result2dataset ));
     }
 
   } catch ( e ) {
