@@ -75,8 +75,8 @@ describe( 'test database-postgresql-context', ()=>{
 
   testdb( 'second test', async function() {
     const connection = this;
-    await this.connect();
-    await this.beginTransaction();
+    await this.connect_database();
+    await this.begin_transaction();
     const sql =`
       SELECT *
       FROM (
@@ -141,14 +141,14 @@ describe( 'test database-postgresql-context', ()=>{
     const res = await connection.query( sql, {foo_id:1,bar_id:2});
     assert.deepEqual( res.firstRow(), {foo_id:1, bar_id:2, buz_id:1, foo_value:'1,2,1' } ) ;
 
-    await this.commitTransaction();
-    await this.disconnect();
+    await this.commit_transaction();
+    await this.disconnect_database();
   });
 
   testdb( 'third test', async function() {
     const connection = this;
-    await this.connect();
-    await this.beginTransaction();
+    await this.connect_database();
+    await this.begin_transaction();
     const sql =`
       SELECT *
       FROM (
@@ -214,8 +214,8 @@ describe( 'test database-postgresql-context', ()=>{
     assert.deepEqual(res.firstRow(),  {foo_id:0, bar_id:1, buz_id:7, foo_value:'0,1,7' } ) ;
 
     // no
-    await this.commitTransaction();
-    await this.disconnect();
+    await this.commit_transaction();
+    await this.disconnect_database();
   });
 
 });

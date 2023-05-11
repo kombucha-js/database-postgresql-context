@@ -55,7 +55,7 @@ const result2log = (result)=>({
 
 async function __query( sql, numberedParams, namedParams ) {
   try {
-    if ( ! this.isConntected() )
+    if ( ! this.is_connected() )
       throw new Error( 'no database connection was established' );
 
     const result = await this.__pgClient.query( sql, numberedParams );
@@ -132,16 +132,16 @@ async function query( query, params ) {
 DatabaseContext.prototype.query = query;
 
 
-function isConntected() {
+function is_connected() {
   return this.__pgClient != null;
 }
-DatabaseContext.prototype.isConntected = isConntected;
+DatabaseContext.prototype.is_connected = is_connected;
 
-async function connect() {
+async function connect_database() {
   this.logger.output({
-    type   : 'database-connect',
+    type   : 'connect-database',
   });
-  if ( this.isConntected() )
+  if ( this.is_connected() )
     throw new DatabaseContextError({message:'this context has already established a connection.'});
 
   this.__pgClient = new Client();
@@ -150,13 +150,13 @@ async function connect() {
 
   return this;
 };
-DatabaseContext.prototype.connect = connect;
+DatabaseContext.prototype.connect_database = connect_database;
 
-async function disconnect() {
+async function disconnect_database() {
   this.logger.output({
-    type   : 'database-disconnect',
+    type   : 'disconnect-database',
   });
-  if ( this.isConntected() ) {
+  if ( this.is_connected() ) {
     if ( 'end' in this.__pgClient ) {
       await this.__pgClient.end();
     } else if ( 'release' in this.__pgClient ) {
@@ -168,7 +168,7 @@ async function disconnect() {
   }
   return this;
 };
-DatabaseContext.prototype.disconnect = disconnect;
+DatabaseContext.prototype.disconnect_database = disconnect_database;
 
 async function initializeContextOfDatabaseContext() {
   // console.log( 'this.getOptions().autoCommit', this.getOptions().autoCommit );
@@ -176,15 +176,15 @@ async function initializeContextOfDatabaseContext() {
     // console.log( 'autoCommit is true ' );
     const context = this;
     context.__autoCommit = true;
-    await context.connect();
-    await context.beginTransaction();
+    await context.connect_database();
+    await context.begin_transaction();
   };
 }
 DatabaseContext.prototype.initializeContextOfDatabaseContext = initializeContextOfDatabaseContext;
 
 async function finalizeContextOfDatabaseContext(is_successful) {
   const context = this;
-  if ( context.isConntected() ) {
+  if ( context.is_connected() ) {
 
     // console.log( 'context.__autoCommit', context.__autoCommit );
 
@@ -192,10 +192,10 @@ async function finalizeContextOfDatabaseContext(is_successful) {
       try {
         if ( is_successful ) {
           context.logger.log( 'commit for finalization' );
-          await context.commitTransaction();
+          await context.commit_transaction();
         } else {
           context.logger.log( 'rollback for finalization' );
-          await context.rollbackTransaction();
+          await context.rollback_transaction();
         }
       } catch ( e ) {
         console.error(e);
@@ -210,9 +210,9 @@ async function finalizeContextOfDatabaseContext(is_successful) {
 
     // This is to ensures that the current connection is properly finalized.
     try {
-      context.logger.log( 'disconnect for finalization' );
-      if ( context.isConntected() ) {
-        await context.disconnect( context );
+      context.logger.log( 'disconnect_database for finalization' );
+      if ( context.is_connected() ) {
+        await context.disconnect_database( context );
       }
     } catch ( e ) {
       console.error(e);
@@ -259,36 +259,36 @@ module.exports.shutdownDatabaseContext = shutdownDatabaseContext;
 // <<<
 
 
-async function beginTransaction() {
+async function begin_transaction() {
   try {
-    this.logger.enter( 'beginTransaction' );
+    this.logger.enter( 'begin_transaction' );
     return await this.query( SQL_BEGIN );
   } finally {
-    this.logger.leave( 'beginTransaction' );
+    this.logger.leave( 'begin_transaction' );
   }
 }
-DatabaseContext.prototype.beginTransaction = beginTransaction;
+DatabaseContext.prototype.begin_transaction = begin_transaction;
 
-async function commitTransaction() {
+async function commit_transaction() {
   try {
-    this.logger.enter( 'commitTransaction' );
+    this.logger.enter( 'commit_transaction' );
     return await this.query( SQL_COMMIT );
   } finally {
-    this.logger.leave( 'commitTransaction' );
+    this.logger.leave( 'commit_transaction' );
   }
-  this.trace( 'commitTransaction' );
+  this.trace( 'commit_transaction' );
 }
-DatabaseContext.prototype.commitTransaction = commitTransaction;
+DatabaseContext.prototype.commit_transaction = commit_transaction;
 
-async function rollbackTransaction() {
+async function rollback_transaction() {
   try {
-    this.logger.enter( 'rollbackTransaction' );
+    this.logger.enter( 'rollback_transaction' );
     return await this.query( SQL_ROLLBACK );
   } finally {
-    this.logger.leave( 'rollbackTransaction' );
+    this.logger.leave( 'rollback_transaction' );
   }
 }
-DatabaseContext.prototype.rollbackTransaction = rollbackTransaction;
+DatabaseContext.prototype.rollback_transaction = rollback_transaction;
 
 
 module.exports = module.exports;
