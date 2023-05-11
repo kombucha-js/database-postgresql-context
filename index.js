@@ -242,23 +242,11 @@ DatabaseContext.prototype.finalizeContextOfDatabaseContext = finalizeContextOfDa
  * ===================================================================
  */
 
-const _sql = (strings,...values)=>{
-  // console.log( strings, values );
-  return (
-    strings
-    .map( (e,i)=> e + (values[i]||'').toString() )
-    .join('')
-    .split('\n')
-    .map( (e)=> e.trim() )
-    .join( '\n' )
-    .trim()
-  );
-}
-const SQL_BEGIN    = _sql`BEGIN;`;
-const SQL_COMMIT   = _sql`COMMIT;`;
-const SQL_ROLLBACK = _sql`ROLLBACK;`;
 
-module.exports._sql = _sql;
+const SQL_BEGIN    = `BEGIN;`;
+const SQL_COMMIT   = `COMMIT;`;
+const SQL_ROLLBACK = `ROLLBACK;`;
+
 
 async function shutdownDatabaseContext() {
   await end();
