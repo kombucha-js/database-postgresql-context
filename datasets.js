@@ -31,7 +31,7 @@ class DatabaseContextDataset {
     return this.#rows;
   }
   get firstRow() {
-    const row = this.firstRowOrNull();
+    const row = this.firstRowOrNull;
     if ( row === null ) {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }

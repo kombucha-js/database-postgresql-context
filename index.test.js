@@ -139,7 +139,7 @@ describe( 'test database-postgresql-context', ()=>{
 
     // connection.logger.error( connection.query( sql ) );
     const res = await connection.query( sql, {foo_id:1,bar_id:2});
-    assert.deepEqual( res.firstRow(), {foo_id:1, bar_id:2, buz_id:1, foo_value:'1,2,1' } ) ;
+    assert.deepEqual( res.firstRow, {foo_id:1, bar_id:2, buz_id:1, foo_value:'1,2,1' } ) ;
 
     await this.commit_transaction();
     await this.disconnect_database();
@@ -211,7 +211,7 @@ describe( 'test database-postgresql-context', ()=>{
 
     // connection.logger.error( connection.query( sql ) );
     const res = await connection.query( sql, {foo_id:0,bar_id:1,buz_id:7});
-    assert.deepEqual(res.firstRow(),  {foo_id:0, bar_id:1, buz_id:7, foo_value:'0,1,7' } ) ;
+    assert.deepEqual(res.firstRow,  {foo_id:0, bar_id:1, buz_id:7, foo_value:'0,1,7' } ) ;
 
     // no
     await this.commit_transaction();
