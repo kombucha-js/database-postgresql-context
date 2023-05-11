@@ -8,8 +8,6 @@ class DatabaseContextError extends Error {
 module.exports.DatabaseContextError = DatabaseContextError;
 
 class DatabaseContextDataset {
-  #rows  = null;
-  #count = null;
   constructor( rows, count ) {
     if ( rows !== null && ! Array.isArray( rows ) ) {
       throw new DatabaseContextError({message:'the `rows` argument should be either null or an array'});
@@ -17,18 +15,18 @@ class DatabaseContextDataset {
     if ( count !== null && typeof count !== 'number' ) {
       throw new DatabaseContextError({message:'the `rows` argument should be either null or an array'});
     }
-    this.#rows  = rows;
-    this.#count = count;
+    this.__rows  = rows;
+    this.__count = count;
   }
   get count() {
-    if ( typeof this.#count  === 'number' ) {
-      return this.#count;
+    if ( typeof this.__count  === 'number' ) {
+      return this.__count;
     } else {
       throw new DatabaseContextError({message:'the query was not an update query'});
     }
   }
   get rows() {
-    return this.#rows;
+    return this.__rows;
   }
   get firstRow() {
     const row = this.firstRowOrNull;
@@ -38,33 +36,33 @@ class DatabaseContextDataset {
     return row;
   }
   get firstRowOrNull() {
-    if ( Array.isArray( this.#rows ) && 0 < this.#rows.length ) {
-      return this.#rows[0];
+    if ( Array.isArray( this.__rows ) && 0 < this.__rows.length ) {
+      return this.__rows[0];
     } else {
       return null;
     }
   }
   get singleRow() {
-    if ( Array.isArray( this.#rows ) ) {
-      if ( this.#rows.length < 1 ) {
+    if ( Array.isArray( this.__rows ) ) {
+      if ( this.__rows.length < 1 ) {
         throw new DatabaseContextError({message:'the result has no dataset'});
-      } else if ( this.#rows.length === 1 ) {
-        return this.#rows[0];
+      } else if ( this.__rows.length === 1 ) {
+        return this.__rows[0];
       } else {
-        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.#rows.length} `});
+        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.__rows.length} `});
       }
     } else {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
   }
   get singleRowOrNull() {
-    if ( Array.isArray( this.#rows ) ) {
-      if ( this.#rows.length < 1 ) {
+    if ( Array.isArray( this.__rows ) ) {
+      if ( this.__rows.length < 1 ) {
         return null;
-      } else if ( this.#rows.length === 1 ) {
-        return this.#rows[0];
+      } else if ( this.__rows.length === 1 ) {
+        return this.__rows[0];
       } else {
-        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.#rows.length} `});
+        throw new DatabaseContextError({message:`NOT UNIQUE : the result has more than one rows ${this.__rows.length} `});
       }
     } else {
       return null;
