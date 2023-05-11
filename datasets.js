@@ -30,21 +30,21 @@ class DatabaseContextDataset {
   get rows() {
     return this.#rows;
   }
-  firstRow() {
+  get firstRow() {
     const row = this.firstRowOrNull();
     if ( row === null ) {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
     return row;
   }
-  firstRowOrNull() {
+  get firstRowOrNull() {
     if ( Array.isArray( this.#rows ) && 0 < this.#rows.length ) {
       return this.#rows[0];
     } else {
       return null;
     }
   }
-  singleRow() {
+  get singleRow() {
     if ( Array.isArray( this.#rows ) ) {
       if ( this.#rows.length < 1 ) {
         throw new DatabaseContextError({message:'the result has no dataset'});
@@ -57,7 +57,7 @@ class DatabaseContextDataset {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
   }
-  singleRowOrNull() {
+  get singleRowOrNull() {
     if ( Array.isArray( this.#rows ) ) {
       if ( this.#rows.length < 1 ) {
         return null;
@@ -70,7 +70,7 @@ class DatabaseContextDataset {
       return null;
     }
   }
-  getResultArray() {
+  get resultArray() {
     throw new DatabaseContextError( MSG_SINGLE_RESULTSET_ERROR );
   }
 }
@@ -94,19 +94,19 @@ class DatabaseContextMultipleDataset {
   get rows() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
   }
-  firstRow() {
+  get firstRow() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
   }
-  firstRowOrNull() {
+  get firstRowOrNull() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
   }
-  singleRow() {
+  get singleRow() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
   }
-  singleRowOrNull() {
+  get singleRowOrNull() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
   }
-  getResultArray() {
+  get resultArray() {
     return [ ...this.#results ];
   }
 }
