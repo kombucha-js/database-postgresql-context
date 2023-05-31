@@ -146,6 +146,7 @@ async function connect_database() {
 
   this.__pgClient = new Client();
   this.__pgClient.connect();
+
   // this.__pgClient = await pool.connect();
 
   return this;
@@ -289,6 +290,26 @@ async function rollback_transaction() {
   }
 }
 DatabaseContext.prototype.rollback_transaction = rollback_transaction;
+
+
+
+/* ===================================================================
+ *
+ * TAG_EVENTS
+ *
+ * ===================================================================
+ */
+DatabaseContext.defineMethod( async function register_pg_eventhandler( event_id, fn ) {
+  try {
+    this.logger.enter( 'register_pg_eventhandler' );
+    this.__pgClient.on( event_id, async(...args)=>{
+      await fn.apply( this, args );
+    });
+  } finally {
+    this.logger.leave( 'register_pg_eventhandler' );
+  }
+},{
+});
 
 
 module.exports = module.exports;
