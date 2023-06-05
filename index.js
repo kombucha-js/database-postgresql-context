@@ -35,6 +35,9 @@ module.exports.end = end;
 
 class DatabaseContext extends AsyncContext {
   ctor(...args) {
+    this.__pgClient = null;
+    this.__connected = false;
+    this.__autoCommit = false;
     this.contextInitializers.push(async function databaseContextInitializer() {
       await this.initializeContextOfDatabaseContext();
     });
@@ -44,6 +47,12 @@ class DatabaseContext extends AsyncContext {
   }
 }
 module.exports.DatabaseContext = DatabaseContext;
+
+DatabaseContext.prototype.__ensure_client = function __ensure_client() {
+  if ( this.__pgClient === null ) {
+    this.__pgClient = new Client();
+  }
+};
 
 
 const result2dataset = result => new DatabaseContextDataset( result .rows ?? null, result.rowCount ?? null);
@@ -133,7 +142,11 @@ DatabaseContext.prototype.query = query;
 
 
 function is_connected() {
-  return this.__pgClient != null;
+  // >>> MODIFIED (Mon, 05 Jun 2023 15:26:11 +0900)
+  // return this.__pgClient != null;
+  this.__ensure_client();
+  return this.__connected === true;
+  // <<< MODIFIED (Mon, 05 Jun 2023 15:26:11 +0900)
 }
 DatabaseContext.prototype.is_connected = is_connected;
 
@@ -144,8 +157,11 @@ async function connect_database() {
   if ( this.is_connected() )
     throw new DatabaseContextError({message:'this context has already established a connection.'});
 
-  this.__pgClient = new Client();
+  // >>> MODIFIED (Mon, 05 Jun 2023 15:26:11 +0900)
+  // this.__pgClient = new Client();
+  // <<< MODIFIED (Mon, 05 Jun 2023 15:26:11 +0900)
   this.__pgClient.connect();
+  this.__connected = true;
 
   // this.__pgClient = await pool.connect();
 
@@ -165,6 +181,7 @@ async function disconnect_database() {
     } else {
       console.error('__pgClient has not method to finalize');
     }
+    this.__connected = false;
     this.__pgClient = null;
   }
   return this;
@@ -175,10 +192,9 @@ async function initializeContextOfDatabaseContext() {
   // console.log( 'this.getOptions().autoCommit', this.getOptions().autoCommit );
   if ( this.getOptions().autoCommit === true ) {
     // console.log( 'autoCommit is true ' );
-    const context = this;
-    context.__autoCommit = true;
-    await context.connect_database();
-    await context.begin_transaction();
+    this.__autoCommit = true;
+    await this.connect_database();
+    await this.begin_transaction();
   };
 }
 DatabaseContext.prototype.initializeContextOfDatabaseContext = initializeContextOfDatabaseContext;
@@ -300,6 +316,7 @@ DatabaseContext.prototype.rollback_transaction = rollback_transaction;
  * ===================================================================
  */
 DatabaseContext.defineMethod( async function register_pg_eventhandler( event_id, fn ) {
+  this.__ensure_client();
   try {
     this.logger.enter( 'register_pg_eventhandler' );
     this.__pgClient.on( event_id, async(...args)=>{
