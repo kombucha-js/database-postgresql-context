@@ -11,6 +11,10 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "pg": "^8.7.3",
+    "sql-named-parameters": "^0.1.5",
+    "end" : true
+  },
+  "dependencies": {
     "sql-named-parameters": "^0.1.5"
   }
 }
