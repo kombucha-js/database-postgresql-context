@@ -14,7 +14,7 @@
     "sql-named-parameters": "^0.1.5",
     "end" : true
   },
-  "dependencies": {
+  "dependencies-bak": {
     "sql-named-parameters": "^0.1.5"
   }
 }
