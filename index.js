@@ -2,7 +2,10 @@
 
 // Object.assign( module.exports,  require( 'asynchronous-context' ));
 
-require('dotenv').config();
+// require('dotenv').config();
+// MODIFIED (Wed, 27 Sep 2023 13:28:23 +0900)
+require('asynchronous-context/env').config();
+
 const { AsyncContext }     = require( 'asynchronous-context/context' );
 const { preventUndefined,unprevent } = require( 'prevent-undefined' );
 const sqlNamedParameters   = require( 'sql-named-parameters' );
