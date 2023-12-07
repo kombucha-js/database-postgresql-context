@@ -12,4 +12,5 @@ const plainsql = (strings,...values)=>{
     .trim()
   );
 };
-module.exports = plainsql;
+
+export{ plainsql };

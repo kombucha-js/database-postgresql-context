@@ -2,9 +2,18 @@
   "name": "database-postgresql-context",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "exports" : {
+    "." :               "./index.mjs",
+    "./index.mjs" :     "./index.mjs",
+    "./datasets.mjs" :  "./datasets.mjs",
+    "./plainsql.mjs" :  "./plainsql.mjs",
+    "./index" :         "./index.mjs",
+    "./datasets" :      "./datasets.mjs",
+    "./plainsql" :      "./plainsql.mjs"
+  },
   "scripts": {
-    "test": "node index.test.js"
+    "test": "node index.test.mjs"
   },
   "author": "",
   "license": "ISC",

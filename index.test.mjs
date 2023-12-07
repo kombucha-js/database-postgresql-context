@@ -1,6 +1,6 @@
 
-const { DatabaseContext } = require( 'database-postgresql-context' );
-const { shutdownDatabaseContext } = require( 'database-postgresql-context' );
+import { DatabaseContext } from  'database-postgresql-context' ;
+import { shutdownDatabaseContext } from  'database-postgresql-context' ;
 
 class TestContext extends DatabaseContext {
   constructor (...args) {
@@ -11,9 +11,11 @@ function createContext(...args) {
   return new TestContext( ...args );
 }
 
-const assert = require( 'node:assert/strict' );
-const { test, describe, it, before, after }  = require( 'node:test' );
-const { createTest } = require( 'asynchronous-context/test-utils' );
+import assert from  'node:assert/strict' ;
+import { test, describe, it, before, after }  from  'node:test' ;
+import { createTest } from  'asynchronous-context/test-utils' ;
+import { randomcat } from  'randomcat' ;
+
 const testdb = createTest( it, createContext, { suppressSuccessfulReport:true, autoCommit:false, showReport:true, coloredReport:true, reportMethod:'stderr' } );
 
 const IN_USERS = [
@@ -27,7 +29,6 @@ const IN_USERS = [
 ];
 
 {
-  const { randomcat } = require( 'randomcat' );
   const lst = [
     'nickname',
     'section',

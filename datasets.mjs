@@ -5,7 +5,7 @@ class DatabaseContextError extends Error {
     this.messageObject = messageObject || {};
   }
 }
-module.exports.DatabaseContextError = DatabaseContextError;
+export { DatabaseContextError };
 
 class DatabaseContextDataset {
   constructor( rows, count ) {
@@ -72,7 +72,7 @@ class DatabaseContextDataset {
     throw new DatabaseContextError( MSG_SINGLE_RESULTSET_ERROR );
   }
 }
-module.exports.DatabaseContextDataset = DatabaseContextDataset;
+export { DatabaseContextDataset };
 
 
 const MSG_SINGLE_RESULTSET_ERROR   = 'single resultset error / cannot call a method for multiple resultsets. ';
@@ -108,6 +108,6 @@ class DatabaseContextMultipleDataset {
     return [ ...this.#results ];
   }
 }
-module.exports.DatabaseContextMultipleDataset = DatabaseContextMultipleDataset;
+export { DatabaseContextMultipleDataset };
 
 

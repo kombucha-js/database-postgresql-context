@@ -1,22 +1,18 @@
 'use strict';
 
-// Object.assign( module.exports,  require( 'asynchronous-context' ));
+import { dotenvFromSettings } from 'asynchronous-context/env';
+import { AsyncContext }     from  'asynchronous-context/context' ;
+import { preventUndefined,unprevent } from  'prevent-undefined' ;
+import sqlNamedParameters   from  'sql-named-parameters' ;
+import pg from 'pg'
+const { Pool, Client } = pg;
 
-// require('dotenv').config();
-// MODIFIED (Wed, 27 Sep 2023 13:28:23 +0900)
-require('asynchronous-context/env').config();
 
-const { AsyncContext }     = require( 'asynchronous-context/context' );
-const { preventUndefined,unprevent } = require( 'prevent-undefined' );
-const sqlNamedParameters   = require( 'sql-named-parameters' );
-
-const { Pool, Client } = require('pg')
-
-const {
+import {
   DatabaseContextError,
   DatabaseContextDataset,
   DatabaseContextMultipleDataset,
-} = require( './datasets' );
+} from  './datasets.mjs' ;
 
 
 const pool = new Pool();
@@ -34,7 +30,7 @@ async function end() {
   return;
 };
 
-module.exports.end = end;
+export { end };
 
 class DatabaseContext extends AsyncContext {
   ctor(...args) {
@@ -49,7 +45,7 @@ class DatabaseContext extends AsyncContext {
     });
   }
 }
-module.exports.DatabaseContext = DatabaseContext;
+export {  DatabaseContext };
 
 DatabaseContext.prototype.__ensure_client = function __ensure_client() {
   if ( this.__pgClient === null ) {
@@ -275,7 +271,7 @@ async function shutdownDatabaseContext() {
 DatabaseContext.shutdownDatabaseContext = shutdownDatabaseContext;
 
 // >>> ADDED (Tue, 18 Apr 2023 10:10:55 +0900)
-module.exports.shutdownDatabaseContext = shutdownDatabaseContext;
+export { shutdownDatabaseContext };
 // <<<
 
 
@@ -332,5 +328,4 @@ DatabaseContext.defineMethod( async function register_pg_eventhandler( event_id,
 });
 
 
-module.exports = module.exports;
 
