@@ -18,6 +18,9 @@ import {
 const pool = new Pool();
 const DEBUG = false;
 
+export const AUTO_COMMIT = "autoCommit";
+export const AUTO_CONNECT = "autoConnect";
+
 // the pool will emit an error on behalf of any idle clients
 // it contains if a backend error or network partition happens
 pool.on('error', (err, client) => {
@@ -37,6 +40,7 @@ class DatabaseContext extends AsyncContext {
     this.__pgClient = null;
     this.__connected = false;
     this.__autoCommit = false;
+    this.__autoConnect = false;
     this.contextInitializers.push(async function databaseContextInitializer() {
       await this.initializeContextOfDatabaseContext();
     });
@@ -188,11 +192,31 @@ async function disconnect_database() {
 DatabaseContext.prototype.disconnect_database = disconnect_database;
 
 async function initializeContextOfDatabaseContext() {
+  /*
+   * Q: Why don't you refer the `autoCommit` field directly? It seems that it
+   * is not necessary to copy the value to another field.
+   * A: Because bad behaving users could modify the value while they are still
+   *    in their session. If autoCommit is true before starting a session and it
+   *    is modified afterwards, the connection state would not properly
+   *    maintained. Therefore, a snapshot needs to be created when it starts a
+   *    new session.
+   *
+   * Wed, 17 Jan 2024 13:36:24 +0900
+   */
   // console.log( 'this.getOptions().autoCommit', this.getOptions().autoCommit );
+
+  /*
+   * Note that `autoCommit` option implies `autoConnect` option.
+   *  Wed, 17 Jan 2024 13:40:07 +0900
+   */
+  if ( this.getOptions().autoConnect === true || this.getOptions().autoCommit === true ) {
+    this.__autoConnect = true;
+    await this.connect_database();
+  }
+
   if ( this.getOptions().autoCommit === true ) {
     // console.log( 'autoCommit is true ' );
     this.__autoCommit = true;
-    await this.connect_database();
     await this.begin_transaction();
   };
 }
@@ -224,20 +248,26 @@ async function finalizeContextOfDatabaseContext(is_successful) {
       }
     }
 
-    // This is to ensures that the current connection is properly finalized.
-    try {
-      context.logger.log( 'disconnect_database for finalization' );
-      if ( context.is_connected() ) {
-        await context.disconnect_database( context );
+  /*
+   * Note that `autoCommit` option implies `autoConnect` option.
+   * Wed, 17 Jan 2024 13:40:07 +0900
+   */
+    if( context.__autoConnect || context.__autoCommit ) {
+      // This is to ensures that the current connection is properly finalized.
+      try {
+        context.logger.log( 'disconnect_database for finalization' );
+        if ( context.is_connected() ) {
+          await context.disconnect_database( context );
+        }
+      } catch ( e ) {
+        console.error(e);
+        // This caused duplicate log data. The method should output log by itself.
+        // this.logger.output({
+        //   type   : 'finalization',
+        //   status : MSG_WARNING,
+        //   value  : { message : '[NOT CRITICAL] an error was occured when cleaning up the current transaction 2', error : e  },
+        // });
       }
-    } catch ( e ) {
-      console.error(e);
-      // This caused duplicate log data. The method should output log by itself.
-      // this.logger.output({
-      //   type   : 'finalization',
-      //   status : MSG_WARNING,
-      //   value  : { message : '[NOT CRITICAL] an error was occured when cleaning up the current transaction 2', error : e  },
-      // });
     }
   }
 }
