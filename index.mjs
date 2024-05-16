@@ -1,9 +1,9 @@
 'use strict';
 
 import { dotenvFromSettings } from 'asynchronous-context/env';
-import { AsyncContext }     from  'asynchronous-context/context' ;
-import { preventUndefined,unprevent } from  'prevent-undefined' ;
-import sqlNamedParameters   from  'sql-named-parameters' ;
+import { AsyncContext }       from 'asynchronous-context/context' ;
+import sqlNamedParameters     from 'sql-named-parameters' ;
+import { sqlmacro }           from 'sqlmacro' ;
 import pg from 'pg'
 const { Pool, Client } = pg;
 
@@ -142,6 +142,26 @@ async function query( query, params ) {
   // 20221018172852
 }
 DatabaseContext.prototype.query = query;
+
+
+/*
+ * The template literal ${} placeholder disallows any other way than statically resolving the variable.
+ * As a result, it is necessary to expand nargs passed as JSON from the outside as a variable.
+ * Originally, the design was based on the assumption that this nargs would be automatically validated using vanilla-schema-validator.
+ * In other words, using the ${} placeholder will overturn the previous design policy.
+ * The design policy was to reduce the amount of coding by automating the validation process.
+ *
+ * (Thu, 16 May 2024 17:44:44 +0900)
+ */
+
+
+/*async*/ function sql( strings, ...values ) {
+  const sqlfunc = sqlmacro(strings, ...values );
+  return (nargs)=>{
+    return this.query( sqlfunc(nargs), nargs);
+  };
+}
+DatabaseContext.prototype.sql = sql;
 
 
 function is_connected() {
