@@ -18,31 +18,31 @@ class DatabaseContextDataset {
     this.__rows  = rows;
     this.__count = count;
   }
-  get count() {
+  get row_count() {
     if ( typeof this.__count  === 'number' ) {
       return this.__count;
     } else {
       throw new DatabaseContextError({message:'the query was not an update query'});
     }
   }
-  get rows() {
+  get all_rows() {
     return this.__rows;
   }
-  get firstRow() {
-    const row = this.firstRowOrNull;
+  get first_row() {
+    const row = this.first_row_or_null;
     if ( row === null ) {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
     return row;
   }
-  get firstRowOrNull() {
+  get first_row_or_null() {
     if ( Array.isArray( this.__rows ) && 0 < this.__rows.length ) {
       return this.__rows[0];
     } else {
       return null;
     }
   }
-  get singleRow() {
+  get single_row() {
     if ( Array.isArray( this.__rows ) ) {
       if ( this.__rows.length < 1 ) {
         throw new DatabaseContextError({message:'the result has no dataset'});
@@ -55,7 +55,7 @@ class DatabaseContextDataset {
       throw new DatabaseContextError({message:'the result has no dataset'});
     }
   }
-  get singleRowOrNull() {
+  get single_row_or_null() {
     if ( Array.isArray( this.__rows ) ) {
       if ( this.__rows.length < 1 ) {
         return null;
@@ -68,8 +68,32 @@ class DatabaseContextDataset {
       return null;
     }
   }
-  get resultArray() {
+  get result_array() {
     throw new DatabaseContextError( MSG_SINGLE_RESULTSET_ERROR );
+  }
+
+  //
+
+  get count() {
+    return this.row_count;
+  }
+  get rows() {
+    return this.all_rows;
+  }
+  get firstRow() {
+    return this.first_row;
+  }
+  get firstRowOrNull() {
+    return this.first_row_or_null;
+  }
+  get singleRow() {
+    return this.single_row;
+  }
+  get singleRowOrNull() {
+    return this.single_row_or_null;
+  }
+  get resultArray() {
+    return this.result_array;
   }
 }
 export { DatabaseContextDataset };
@@ -86,26 +110,49 @@ class DatabaseContextMultipleDataset {
 
     this.#results = results;
   }
-  get count() {
+  get row_count() {
     throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  get all_rows() {
+    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  get first_row() {
+    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  get first_row_or_null() {
+    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  get single_row() {
+    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  get single_row_or_null() {
+    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+  }
+  get result_array() {
+    return [ ...this.#results ];
+  }
+
+  //
+  get count() {
+    return this.row_count;
   }
   get rows() {
-    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+    return this.all_rows;
   }
   get firstRow() {
-    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+    return this.first_row;
   }
   get firstRowOrNull() {
-    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+    return this.first_row_or_null;
   }
   get singleRow() {
-    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+    return this.single_row;
   }
   get singleRowOrNull() {
-    throw new DatabaseContextError( MSG_MULTIPLE_RESULTSET_ERROR );
+    return this.single_row_or_null;
   }
   get resultArray() {
-    return [ ...this.#results ];
+    return this.result_array;
   }
 }
 export { DatabaseContextMultipleDataset };
