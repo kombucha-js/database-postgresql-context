@@ -27,33 +27,10 @@ class Hello  {
   }
 }
 
-await (
-  (async ()=>{
-    const THello = mixin( 'THello', AsyncContext, DatabaseContext , Hello  );
-    const context = THello.create({  autoConnect: false, autoCommit:false, coloredReport:true, reportMethod:'stderr' });
-    await context.executeTransaction( async function() {
-      let succeeded = false;
-      try {
-        await this.connect_database();
-        await this.begin_transaction();
-        await this.sql`
-         DO
-         $SQL$
-           BEGIN
-             RAISE NOTICE 'hi!!! this is an intentional error!!!';
-           END;
-         $SQL$
-       `();
-        await this.commit_transaction();
-
-        succeeded = true;
-
-      } finally {
-        await this.disconnect_database();
-        this.logger.reportResult( succeeded );
-      }
-    });
-  })()
-)
+export const execute = async (fn)=>{
+  const THello = mixin( 'THello', AsyncContext, DatabaseContext , Hello  );
+  const context = THello.create({  autoConnect: false, autoCommit:false, coloredReport:true, reportMethod:'stderr' });
+  await context.executeTransaction( fn );
+};
 
 
