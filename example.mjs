@@ -3,7 +3,7 @@ import { execute } from "database-postgresql-context/utils.mjs";
 
 await execute( async function proc() {
   console.log('hello')
-  let succeeded = false;
+  let is_successful = false;
   try {
     await this.connect_database();
     await this.begin_transaction();
@@ -17,11 +17,11 @@ await execute( async function proc() {
      `();
     await this.commit_transaction();
 
-    succeeded = true;
+    is_successful = true;
 
   } finally {
     await this.disconnect_database();
-    this.logger.reportResult( succeeded );
+    this.logger.reportResult( is_successful );
   }
 });
 
