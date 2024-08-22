@@ -157,8 +157,8 @@ DatabaseContext.prototype.query = query;
 
 /*async*/ function sql( strings, ...values ) {
   const sqlfunc = sqlmacro(strings, ...values );
-  return (nargs)=>{
-    return this.query( sqlfunc(nargs), nargs);
+  return (...args)=>{
+    return this.query( sqlfunc(...args), Object.assign({}, ...args ) );
   };
 }
 DatabaseContext.prototype.sql = sql;
