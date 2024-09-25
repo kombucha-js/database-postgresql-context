@@ -16,7 +16,7 @@ import { test, describe, it, before, after }  from  'node:test' ;
 import { createTest } from  'asynchronous-context/test-utils' ;
 import { randomcat } from  'randomcat' ;
 
-const testdb = createTest( it, createContext, { suppressSuccessfulReport:true, autoCommit:false, showReport:true, coloredReport:true, reportMethod:'stderr' } );
+const testdb = createTest( it, createContext, { suppressSuccessfulReport:true, autoCommit:false, showReport:true, coloredReport:true, reportMethod:'stderr' , delegatorFactory: fn=>function(...args){return fn.apply(this,args)} } );
 
 const IN_USERS = [
   { username:'hello_world', local_attrs: {age:12, nickname: 'foo-12',  nickname1: 'bar-12',  nickname2: 'bum-12',} },
